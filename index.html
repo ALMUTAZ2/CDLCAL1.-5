@@ -1805,57 +1805,60 @@
             return Math.max(0, Math.min(100, (totalScore / maxScore) * 100));
         }
 
-        function calculateMultiTransformerSummary(transformers, totalLoad, balanceScore) {
-            let totalBreakers = 0;
-            let totalMeters = 0;
-            let overloadedBreakers = 0;
-            let overloadedTransformers = 0;
-            let maxUtilization = 0;
-            let minUtilization = 100;
-            let totalUtilization = 0;
-            let utilizationCount = 0;
-
-            transformers.forEach(transformer => {
-                const activeBreakers = transformer.breakers.filter(b => b.meters.length > 0);
-                totalBreakers += activeBreakers.length;
-                
-                activeBreakers.forEach(breaker => {
-                    totalMeters += breaker.meters.length;
-                    if (breaker.utilizationPercent > 100) {
-                        overloadedBreakers++;
-                    }
-                    maxUtilization = Math.max(maxUtilization, breaker.utilizationPercent);
-                    minUtilization = Math.min(minUtilization, breaker.utilizationPercent);
-                    totalUtilization += breaker.utilizationPercent;
-                    utilizationCount++;
-                });
-
-                // تحقق من تجاوز المحول لحد 80%
-                const transformerUtilization = (transformer.assignedLoad / transformer.type.safeLoad) * 100;
-                if (transformerUtilization > 100) {
-                    overloadedTransformers++;
-                }
-            });
-
-            const avgUtilization = utilizationCount > 0 ? totalUtilization / utilizationCount : 0;
-
-            return {
-                totalTransformers: transformers.length,
-                totalBreakers,
-                totalMeters,
-                totalLoad: totalLoad.toFixed(1),
-                overloadedBreakers,
-                overloadedTransformers,
-                maxUtilization: maxUtilization.toFixed(1),
-                minUtilization: minUtilization === 100 ? '0.0' : minUtilization.toFixed(1),
-                avgUtilization: avgUtilization.toFixed(1),
-                balanceScore: balanceScore.toFixed(1),
-                efficiency: calculateOverallEfficiency(transformers).toFixed(1)
-            };
-        }
+        
 
         function calculateOverallEfficiency(transformers) {
-            let totalUsedCapacity = 0;
+            let totalUsedCapacityfunction calculateMultiTransformerSummary(transformers, totalLoad, balanceScore) {
+    // ✅ حساب العدادات من القائمة المضافة
+    const totalMeters = meters.reduce((sum, meter) => sum + meter.count, 0);
+    
+    let totalBreakers = 0;
+    let overloadedBreakers = 0;
+    let overloadedTransformers = 0;
+    let maxUtilization = 0;
+    let minUtilization = 100;
+    let totalUtilization = 0;
+    let utilizationCount = 0;
+
+    transformers.forEach(transformer => {
+        const activeBreakers = transformer.breakers.filter(b => b.meters.length > 0);
+        totalBreakers += activeBreakers.length;
+        
+        activeBreakers.forEach(breaker => {
+            // ❌ السطر المحذوف: totalMeters += breaker.meters.length;
+            if (breaker.utilizationPercent > 100) {
+                overloadedBreakers++;
+            }
+            maxUtilization = Math.max(maxUtilization, breaker.utilizationPercent);
+            minUtilization = Math.min(minUtilization, breaker.utilizationPercent);
+            totalUtilization += breaker.utilizationPercent;
+            utilizationCount++;
+        });
+
+        // تحقق من تجاوز المحول لحد 80%
+        const transformerUtilization = (transformer.assignedLoad / transformer.type.safeLoad) * 100;
+        if (transformerUtilization > 100) {
+            overloadedTransformers++;
+        }
+    });
+
+    const avgUtilization = utilizationCount > 0 ? totalUtilization / utilizationCount : 0;
+
+    return {
+        totalTransformers: transformers.length,
+        totalBreakers,
+        totalMeters, // ✅ سيستخدم القيمة من القائمة المضافة
+        totalLoad: totalLoad.toFixed(1),
+        overloadedBreakers,
+        overloadedTransformers,
+        maxUtilization: maxUtilization.toFixed(1),
+        minUtilization: minUtilization === 100 ? '0.0' : minUtilization.toFixed(1),
+        avgUtilization: avgUtilization.toFixed(1),
+        balanceScore: balanceScore.toFixed(1),
+        efficiency: calculateOverallEfficiency(transformers).toFixed(1)
+    };
+}
+ = 0;
             let totalAvailableCapacity = 0;
 
             transformers.forEach(transformer => {
